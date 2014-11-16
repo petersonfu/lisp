@@ -11,7 +11,8 @@
     :artist artist
     :rating rating
     :ripped ripped))
-(defun add-record (cd) (push cd *db*))
+(defun add-record (cd)
+  (push cd *db*))
 
 (defun prompt-read (prompt)
   (format *query-io* "~a: " prompt)
@@ -25,7 +26,7 @@
     (y-or-n-p "ripped [y/n]")))
 (defun add-cds ()
   (loop (add-record (prompt-for-cd))
-    (if (not (y-or-n-p "Another? [y/n]: ")) (return))))
+        (if (not (y-or-n-p "Another? [y/n]: ")) (return))))
 
 (defun save-db (filename)
   (with-open-file
@@ -49,39 +50,39 @@
 ; (select (artist-selector "Dixi"))
 (defun where (&key title artist rating (ripped nil ripped-p))
   #'(lambda (cd)
-    (and
-      (if artist
-        (equal (getf cd :artist) artist)
-        t)
-      (if title
-        (equal (getf cd :title) title)
-        t)
-      (if rating
-        (equal (getf cd :rating) rating)
-        t)
-      (if ripped-p
-        (equal (getf cd :ripped) ripped)
-        t)
-      )))
+     (and
+       (if artist
+           (equal (getf cd :artist) artist)
+           t)
+       (if title
+           (equal (getf cd :title) title)
+           t)
+       (if rating
+           (equal (getf cd :rating) rating)
+           t)
+       (if ripped-p
+           (equal (getf cd :ripped) ripped)
+           t)
+       )))
 ; (select (where :artist "Dixi"))
 
 (defun update (selector-fun &key title artist rating (ripped nil ripped-p))
   (setf *db*
-    (mapcar
-      #'(lambda (row)
-          (when (funcall selector-fun row)
-            (if title (setf (getf row :title) title))
-            (if artist (setf (getf row :artist) artist))
-            (if rating (setf (getf row :rating) rating))
-            (if ripped-p (setf (getf row :ripped) ripped)))
-          row)
-      *db*)))
+        (mapcar
+          #'(lambda (row)
+             (when (funcall selector-fun row)
+               (if title (setf (getf row :title) title))
+               (if artist (setf (getf row :artist) artist))
+               (if rating (setf (getf row :rating) rating))
+               (if ripped-p (setf (getf row :ripped) ripped)))
+             row)
+          *db*)))
 ; (update (where :artist "aaa") :rating 11)
 
 (defun make-comparison-expr (field value)
   `(equal (getf cd ,field) ,value))
 (defun make-comparisons-list (fields)
   (loop while fields
-     collecting (make-comparison-expr (pop fields) (pop fields))))
+        collecting (make-comparison-expr (pop fields) (pop fields))))
 (defmacro where (&rest clauses)
   `#'(lambda (cd) (and ,@(make-comparisons-list clauses))))
